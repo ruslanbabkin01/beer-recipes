@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { BtnLoadMore, Loader, RecipeList } from '../components'
-import { useRecipes } from '../store'
+import { useRecipes } from '../store/store'
 
 function RecipesPage() {
   const { recipes, isHasRecipes, isLoading, error, getRecipes, onLoadMore } =

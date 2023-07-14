@@ -1,6 +1,6 @@
 import { useParams } from 'react-router-dom'
 import { useEffect } from 'react'
-import { useRecipes } from '../store'
+import { useRecipes } from '../store/store'
 
 export default function RecipePage() {
   const getRecipeById = useRecipes(state => state.getRecipeById)
