@@ -4,7 +4,7 @@ Built with vite
 
 ## 🌐 Live Link
 
-Check out the live version here: [BEER RECiPES APP]()
+Check out the live version here: [BEER RECiPES APP](https://beer-recipes-five.vercel.app/)
 
 ## 🛠️ Technologies
 
@@ -34,7 +34,7 @@ Each recipe includes the following data:
 - Food Pairing: Suggested food pairings or dishes that complement the beer
 - Image: An image or thumbnail representing the beer
   
-# The application allows users to view individual recipes, and perform actions such as selecting multiple recipes, deleting chosen recipes, and navigating to a single recipe page. The goal is to provide an interactive and user-friendly interface for exploring and managing beer recipes
+ The application allows users to view individual recipes, and perform actions such as selecting multiple recipes, deleting chosen recipes, and navigating to a single recipe page. The goal is to provide an interactive and user-friendly interface for exploring and managing beer recipes
 
 ## Getting Started
 
