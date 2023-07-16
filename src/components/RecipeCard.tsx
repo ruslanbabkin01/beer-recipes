@@ -9,7 +9,6 @@ interface IRecipeProps {
 export default function RecipeCard({
   recipe: { image_url, name, id },
 }: IRecipeProps) {
-  const removeRecipe = useRecipes(state => state.removeRecipe)
   const selectRecipes = useRecipes(state => state.selectRecipes)
   const selectedRecipes = useRecipes(state => state.selectedRecipes)
 
@@ -19,35 +18,22 @@ export default function RecipeCard({
   }
 
   return (
-    <div
-      className='p-3 rounded'
-      onContextMenu={e => handleSelect(e, id)}
-      style={{
-        backgroundColor: selectedRecipes.includes(id)
-          ? '#00ced1'
-          : 'transparent',
-      }}
-    >
-      <NavLink to={`/recipes/${id}`}>
-        <div className='flex flex-col justify-center items-center'>
-          <div className='hover:cursor-pointer max-w-xs  lg:max-w-sm mx-auto flex items-center sm:mb-0'>
-            <img
-              src={image_url}
-              alt={name}
-              className='object-cover max-h-52 rounded'
-            />
-          </div>
+    <NavLink to={`/recipes/${id}`}>
+      <div
+        onContextMenu={e => handleSelect(e, id)}
+        className={`flex flex-col justify-center items-center p-2 shadow-xl border rounded max-h-96  ${
+          selectedRecipes.includes(id) ? 'bg-teal-200' : 'bg-transparent'
+        }`}
+      >
+        <img
+          src={image_url}
+          alt={name}
+          loading='lazy'
+          className='object-cover max-h-80'
+        />
 
-          <h3 className='my-2 text-center font-semibold'>{name}</h3>
-
-          <button
-            className='hover:cursor-pointer my-2 rounded-sm border-2 bg-gray-500 text-slate-200 px-4 py-2 ease-out duration-300 hover:scale-105 '
-            onClick={() => removeRecipe(id)}
-          >
-            Delete
-          </button>
-        </div>
-      </NavLink>
-    </div>
+        <h3 className='my-2 text-center font-semibold'>{name}</h3>
+      </div>
+    </NavLink>
   )
 }

@@ -1,13 +1,18 @@
 import { create } from 'zustand'
-import { persist, devtools } from 'zustand/middleware'
+import { devtools } from 'zustand/middleware'
 import { Recipe } from '../types/recipe'
-import { fetchRecipeById, fetchRecipes } from '../services'
-import { PER_PAGE } from '../utils/constants'
-import { AxiosError } from 'axios'
+import axios, { AxiosError } from 'axios'
 import { toast } from 'react-toastify'
+
+const BASE_URL = 'https://api.punkapi.com/v2/beers/'
+
+export const beerRecipeAPI = axios.create({
+  baseURL: BASE_URL,
+})
 
 interface State {
   recipes: Recipe[]
+  secondRecipes: Recipe[]
   currentRecipe: Recipe | null
   selectedRecipes: number[]
   page: number
@@ -16,14 +21,15 @@ interface State {
   error: string | null
   getRecipes: () => Promise<void>
   getRecipeById: (id: string) => Promise<void>
-  removeRecipe: (id: number) => void
-  onLoadMore: () => void
   selectRecipes: (id: number) => void
+  removeRecipes: (id: number[]) => Promise<void>
+  checkRecipes: () => void
 }
 
 export const useRecipes = create<State, [['zustand/devtools', State]]>(
   devtools((set, get) => ({
     recipes: [],
+    secondRecipes: [],
     currentRecipe: null,
     selectedRecipes: [],
     page: 1,
@@ -34,15 +40,17 @@ export const useRecipes = create<State, [['zustand/devtools', State]]>(
     getRecipes: async () => {
       set({ isLoading: true })
       try {
-        const res = await fetchRecipes(get().page)
-
-        set({
-          recipes: [...get().recipes, ...res],
+        const { data } = await beerRecipeAPI.get<Recipe[]>('', {
+          params: {
+            page: get().page,
+          },
         })
 
-        if (res.length < PER_PAGE) {
-          set({ isHasRecipes: false })
-        }
+        set({
+          secondRecipes: [...get().secondRecipes, ...data],
+        })
+
+        get().checkRecipes()
       } catch (e: unknown) {
         const error = e as AxiosError
         console.log(error.message)
@@ -53,10 +61,23 @@ export const useRecipes = create<State, [['zustand/devtools', State]]>(
       }
     },
 
+    checkRecipes: () => {
+      const lengthBaseArr = get().recipes.length
+
+      if (lengthBaseArr < 15) {
+        const requiredRecipes = 15 - lengthBaseArr
+        const necessaryArr = get().secondRecipes.slice(0, requiredRecipes)
+        set({
+          recipes: [...get().recipes, ...necessaryArr],
+          secondRecipes: get().secondRecipes.slice(requiredRecipes),
+        })
+      }
+    },
+
     getRecipeById: async recipeId => {
       try {
-        const res = await fetchRecipeById(recipeId)
-        set({ currentRecipe: res })
+        const { data } = await beerRecipeAPI.get<Recipe[]>(`/${recipeId}`)
+        set({ currentRecipe: data[0] })
       } catch (e: unknown) {
         const error = e as AxiosError
         console.log(error.message)
@@ -64,8 +85,19 @@ export const useRecipes = create<State, [['zustand/devtools', State]]>(
       }
     },
 
-    removeRecipe: recipeId => {
-      set({ recipes: get().recipes.filter(recipe => recipe.id !== recipeId) })
+    removeRecipes: async (ids: number[]) => {
+      const selectedRecipes = get().selectedRecipes.length
+      if (selectedRecipes > get().secondRecipes.length) {
+        set({ page: get().page + 1 })
+        await get().getRecipes()
+      }
+
+      set({
+        recipes: get().recipes.filter(recipe => !ids.includes(recipe.id)),
+        selectedRecipes: [],
+      })
+
+      get().checkRecipes()
     },
 
     selectRecipes: recipeId => {
@@ -77,10 +109,6 @@ export const useRecipes = create<State, [['zustand/devtools', State]]>(
         : set({
             selectedRecipes: [...currentArr, recipeId],
           })
-    },
-
-    onLoadMore: () => {
-      set({ page: get().page + 1 })
     },
   }))
 )
